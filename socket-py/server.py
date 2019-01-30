@@ -6,7 +6,7 @@ lg.basicConfig(level=lg.DEBUG, format="%(asctime)s [%(levelname)8s] %(name)s: %(
 log = lg.getLogger()
 
 bufsize = int(os.environ.get("RECV_BUFSIZE", 4096))
-port = int(os.environ.get("SERVER_PORT", 5000))
+port = 5000
 host = "0.0.0.0"
 response_header_str_fmt = (
     "HTTP/1.0 200 OK\r\n"
@@ -17,18 +17,17 @@ response_header_str_fmt = (
 with socket.socket() as sock:
     sock.bind((host, port))
     sock.listen()
-    log.info("Server started on: %s:%s" % (host, port))
+    log.info("Started listening on on: %s:%s" % (host, port))
 
-    while True:
-        conn, addr = sock.accept()
-        log.info("New connection from: %s:%s" % addr)
+    conn, addr = sock.accept()
+    log.info("New connection from: %s:%s" % addr)
 
-        with conn:
-            request_str = conn.recv(bufsize).decode()
-            log.debug("Request:\n%s" % request_str)
+    with conn:
+        request_str = conn.recv(bufsize).decode()
+        log.debug("Request:\n%s" % request_str)
 
-            response_body_str = request_str.replace("\r\n", "; ").replace("\n", "; ")
-            response_header_str = response_header_str_fmt % len(response_body_str)
-            response_str = response_header_str + response_body_str
-            log.debug("Response:\n%s" % response_str)
-            conn.send(response_str.encode())
+        response_body_str = request_str.replace("\r\n", "; ").replace("\n", "; ")
+        response_header_str = response_header_str_fmt % len(response_body_str)
+        response_str = response_header_str + response_body_str
+        log.debug("Response:\n%s" % response_str)
+        conn.send(response_str.encode())
